@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>2.3</version>
+        <relativePath/>
+    </parent>
+    <groupId>com.microfocus.jenkins.plugins.da</groupId>
+    <artifactId>microfocus-da</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>hpi</packaging>
+
+    <name>Micro Focus Deployment Automation</name>
+    <description>Micro Focus Deployment Automation Build Steps</description>
+    <url>
+        http://www.serena.com/index.php/en/products/deployment-configuration-automation/serena-deployment-automation/overview
+    </url>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>akevinlee</id>
+            <name>Kevin A. Lee</name>
+            <email>klee@serena.com</email>
+        </developer>
+    </developers>
+
+    <properties>
+        <jenkins.version>1.642.4</jenkins.version>
+        <java.level>7</java.level>
+        <workflow-step-api.version>2.7</workflow-step-api.version>
+        <workflow-cps.version>2.23</workflow-cps.version>
+        <workflow-job.version>2.9</workflow-job.version>
+        <credentials.version>2.1.10</credentials.version>
+        <plain-credentials.version>1.3</plain-credentials.version>
+        <httpclient.version>4.5.1</httpclient.version>
+        <junit.version>4.11</junit.version>
+        <sda-version>6.1.3</sda-version>
+    </properties>
+
+    <dependencies>
+
+        <!-- jenkins pipeline api -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <version>${workflow-step-api.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!--dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-cps</artifactId>
+            <version>${workflow-cps.version}</version>
+            <scope>test</scope>
+        </dependency-->
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-job</artifactId>
+            <version>${workflow-job.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- jenkins credentials api -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials</artifactId>
+            <version>${credentials.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>plain-credentials</artifactId>
+            <version>${plain-credentials.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+        </dependency>
+
+        from vfs
+        <dependency>
+            <groupId>org.codehaus.jettison</groupId>
+            <artifactId>jettison</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        from vfs
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-bundle</artifactId>
+            <version>1.17.1</version>
+        </dependency>
+
+        from vfs
+        <dependency> from vfs
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+        from commons-utils
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.jettison</groupId>
+            <artifactId>jettison</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.urbancode</groupId>
+            <artifactId>codestation2-client-all</artifactId>
+            <version>1.1</version>
+        </dependency-->
+
+        <!--dependency>
+            <groupId>com.serena</groupId>
+            <artifactId>commons-fileutils</artifactId>
+            <version>CURRENT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.serena</groupId>
+            <artifactId>commons-util</artifactId>
+            <version>CURRENT</version>
+        </dependency-->
+
+        <dependency>
+            <groupId>com.serena</groupId>
+            <artifactId>vfs</artifactId>
+            <version>CURRENT</version>
+        </dependency>
+
+    </dependencies>
+
+
+    <scm>
+      <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
+      <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
+      <url>http://github.com/jenkinsci/${project.artifactId}-plugin</url>
+    </scm>
+
+    <repositories>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>InjectedTest.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>
