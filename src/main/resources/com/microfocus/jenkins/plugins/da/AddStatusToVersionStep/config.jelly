@@ -15,11 +15,7 @@
     <f:entry field="versionName" title="${%Version Name}" help="${helpURL}/help-versionName.html">
         <f:textbox default="${descriptor.getDefaultVersionName()}"/>
     </f:entry>
-    <f:entry field="versionProperties" title="${%Version Properties}" help="${helpURL}/help-versionProperties.html">
-        <f:textarea/>
+    <f:entry field="statusName" title="${%Status Name}" help="${helpURL}/help-statusName.html">
+        <f:textbox default="BUILT"/>
     </f:entry>
-    <f:entry file="failIfVersionExists" title="${%Fail if Version already Exists}" help="${helpURL}/help-failIfVersionExists.html">
-        <f:checkbox/>
-    </f:entry>
-
 </j:jelly>

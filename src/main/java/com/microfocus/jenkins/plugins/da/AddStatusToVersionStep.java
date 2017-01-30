@@ -86,10 +86,13 @@ package com.microfocus.jenkins.plugins.da;
 
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.microfocus.jenkins.plugins.da.client.DAClient;
-import com.microfocus.jenkins.plugins.da.exceptions.VersionAlreadyExistsException;
 import com.microfocus.jenkins.plugins.da.exceptions.VersionNotExistsException;
 import com.microfocus.jenkins.plugins.da.model.DAStep;
 import com.microfocus.jenkins.plugins.da.utils.DAUtils;
+import com.urbancode.commons.fileutils.filelister.FileListerBuilder;
+import com.urbancode.vfs.client.Client;
+import com.urbancode.vfs.common.ClientChangeSet;
+import com.urbancode.vfs.common.ClientPathEntry;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
@@ -106,22 +109,22 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.ws.rs.core.UriBuilder;
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.util.*;
 
 /**
- * Step to create a new component version in Micro Focus Deployment Automation
+ * Step to add a status to a component version in Micro Focus Deployment Automation
  *
  * @author Kevin A. Lee
  */
-public class CreateVersionStep extends DAStep {
+public class AddStatusToVersionStep extends DAStep {
 
     private String componentName;
     private String versionName;
-    private String versionProperties;
-    private boolean failIfVersionExists;
+    private String statusName;
 
     @DataBoundSetter
     public void setComponentName(final String componentName) {
@@ -142,39 +145,28 @@ public class CreateVersionStep extends DAStep {
     }
 
     @DataBoundSetter
-    public void setVersionProperties(final String versionProperties) {
-        this.versionProperties = versionProperties;
+    public void setStatusName(final String statusName) {
+        this.statusName = statusName;
     }
 
-    public String getVersionProperties() {
-        return this.versionProperties;
-    }
-
-    @DataBoundSetter
-    public void setFailIfVersionExists(final boolean failIfVersionExists) {
-        this.failIfVersionExists = failIfVersionExists;
-    }
-
-    public boolean getFailIfVersionExists() {
-        return this.failIfVersionExists;
+    public String getStatusName() {
+        return this.statusName;
     }
 
     @DataBoundConstructor
-    public CreateVersionStep(final String url) {
+    public AddStatusToVersionStep(final String url) {
         this.setUrl(DAUtils.rmSlashFromUrl(url));
     }
 
-
     /**
-     * Descriptor for {@link CreateVersionStep}. Used as a singleton.
+     * Descriptor for {@link AddStatusToVersionStep}. Used as a singleton.
      * The class is marked as public so that it can be accessed from views.
      *
      * <p>
-     * See {@code src/main/resources/com/microfocus/jenkins/plugins/da/CreateVersionStep/*.jelly}
+     * See {@code src/main/resources/com/microfocus/jenkins/plugins/da/AddFilesToVersionStep/*.jelly}
      * for the actual HTML fragment for the configuration screen.
-     * </p>
      */
-    @Symbol("daCreateVersion")
+    @Symbol("daAddStatusToVersion")
     @Extension
     public static class DescriptorImpl extends DADescriptorImpl {
 
@@ -198,15 +190,21 @@ public class CreateVersionStep extends DAStep {
             return verifyVersionName(value);
         }
 
-        public String getDefaultVersionName() {
-            return "${BUILD_NUMBER}";
+        private FormValidation verifyStatusName(final String statusName) {
+            if (StringUtils.isEmpty(statusName))
+                return FormValidation.error("A status name is required");
+            return FormValidation.ok();
+        }
+
+        public FormValidation doCheckStatusName(@QueryParameter final String value) {
+            return verifyStatusName(value);
         }
 
         @Override
         public String getDisplayName() {
-            return "Micro Focus DA Create Version";
+            return "Micro Focus DA Add Status To Version";
         }
-   }
+    }
 
     @Override
     public void perform(Run<?,?> run, FilePath workspace, Launcher launcher, TaskListener listener)
@@ -216,7 +214,7 @@ public class CreateVersionStep extends DAStep {
 
         String resolvedComponentName = run.getEnvironment(listener).expand(getComponentName());
         String resolvedVersionName = run.getEnvironment(listener).expand(getVersionName());
-        String resolvedVersionProperties = run.getEnvironment(listener).expand(getVersionProperties());
+        String resolvedStatusName = run.getEnvironment(listener).expand(getStatusName());
 
         final UsernamePasswordCredentials usernamePasswordCredentials = DAUtils.getUsernamePasswordCredentials(getCredentialsId());
         if (usernamePasswordCredentials == null) {
@@ -241,91 +239,41 @@ public class CreateVersionStep extends DAStep {
         }
 
         String componentId = null;
+        String componentRepositoryId = null;
         String versionId = null;
-        boolean createVersion = true;
 
         // get the internal id of the component
         try {
             // get componentId
             String compId[] = daClient.getComponentIdAndRepositoryId(resolvedComponentName);
             componentId = compId[0];
+            componentRepositoryId = compId[1];
             //log("Found component id: " + componentId);
         } catch (Exception ex) {
             throw new AbortException("Unable to retrieve component id: " + ex.toString());
         }
 
-        // check if version already exists
+        // check if version exists
         try {
             versionId = daClient.getComponentVersionId(componentId, resolvedVersionName);
             //log("Version \"" + resolvedVersionName + "\" already exists with id: " + versionId);
         } catch (VersionNotExistsException ex) {
-            // ignore
+            throw new AbortException("\"Version \"" + resolvedVersionName + "\" does not exists");
         } catch (Exception ex) {
             throw new AbortException("Unable to check if version already exists: " + ex.toString());
         }
-        if (versionId != null) {
-            if (getFailIfVersionExists()) {
-                throw new AbortException("\"Version \"" + resolvedVersionName + "\" already exists with id: \"" + versionId + "\"");
-            } else {
-                log("\"Version \"" + resolvedVersionName + "\" already exists with id: \"" + versionId + "\"");
-                createVersion = false;
-            }
-        }
-
-        // create the new version
-        if (createVersion) {
-            try {
-                UriBuilder uriBuilder = UriBuilder.fromPath(getUrl()).path("cli").path("version").path("createVersion");
-                uriBuilder.queryParam("component", resolvedComponentName);
-                uriBuilder.queryParam("name", resolvedVersionName);
-                URI uri = uriBuilder.build();
-                log("Creating new version \"" + resolvedVersionName + "\" on component \"" + resolvedComponentName + "\"");
-                String jsonOut = daClient.executeJSONPost(uri, "");
-                JSONObject verObj = new JSONObject(jsonOut);
-                versionId = verObj.getString("id");
-                log("Successfully created new component version: " +
-                        HyperlinkNote.encodeTo(getUrl() + "/app#/version/" + versionId + "/artifacts", resolvedVersionName));
-            } catch (Exception ex) {
-                throw new AbortException("Unable to create component version: " + ex.getLocalizedMessage());
-            }
-        }
 
         try {
-            // iterate over version properties to construct JSON string
-            if (resolvedVersionProperties == null || resolvedVersionProperties.trim().length() == 0) {
-                log("No component version properties defined");
-            } else {
-                String jsonVersionProperties = "{";
-                log("Creating the following properties on version \"" + resolvedVersionName + "\":");
-                // iterate over properties
-                BufferedReader bufReader = new BufferedReader(new StringReader(resolvedVersionProperties));
-                String line = null, propName = null, propVal = null;
-                while ((line = bufReader.readLine()) != null) {
-                    if (line.trim().length() > 0) { // ignore empty lines
-                        String[] parts = line.trim().split("=");
-                        log("\t" + parts[0] + " = " + parts[1]);
-                        jsonVersionProperties += ("\"" + parts[0] + "\": \"" + parts[1] + "\",");
-                    }
-                }
-                // remove last comma if it exists
-                if (jsonVersionProperties.endsWith(",")) jsonVersionProperties =
-                        jsonVersionProperties.substring(0, jsonVersionProperties.length() - 1);
-                jsonVersionProperties += "}";
-
-                // get property sheet id
-                String propSheetId = daClient.getComponentVersionPropsheetId(versionId);
-                //log("Found component version property sheet id: " + propSheetId);
-
-                // put properties
-                String encodedPropSheetId = "components%26" + componentId + "%26versions%26" + versionId
-                        + "%26propSheetGroup%26propSheets%26" + propSheetId + ".-1/allPropValues";
-                URI uri = UriBuilder.fromPath(this.getUrl()).path("property").path("propSheet").path(encodedPropSheetId).build();
-                //log("Calling URI \"" + uri.toString() + "\" with body " + jsonVersionProperties);
-                daClient.executeJSONPut(uri,jsonVersionProperties);
-                log("Successfully created new component version properties");
-            }
-        } catch (Exception ex) {
-            throw new AbortException("Unable to create component version properties: " + ex.getLocalizedMessage());
+            UriBuilder uriBuilder = UriBuilder.fromPath(getUrl()).path("rest").path("deploy").path("version")
+                    .path(versionId).path("status").path(resolvedStatusName);
+            URI uri = uriBuilder.build();
+            String json = "{\"status\":\"" + statusName + "\"}";
+            log("Adding status \"" + resolvedStatusName + "\" to component version id: \"" + versionId + "\"");
+            daClient.executeJSONPut(uri, json);
+            log("Successfully added status \"" + resolvedStatusName + "\"");
+        }
+        catch (Throwable ex) {
+            throw new AbortException("Failed to add status to component version: " + ex.toString());
         }
 
     }

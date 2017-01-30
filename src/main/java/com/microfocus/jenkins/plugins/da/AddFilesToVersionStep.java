@@ -225,7 +225,15 @@ public class AddFilesToVersionStep extends DAStep {
         }
 
         public FormValidation doCheckVersionName(@QueryParameter final String value) {
-            return verifyComponentName(value);
+            return verifyVersionName(value);
+        }
+
+        public String getDefaultWorkspace() {
+            return "${WORKSPACE}";
+        }
+
+        public String getDefaultVersionName() {
+            return "${BUILD_NUMBER}";
         }
 
         @Override
