@@ -84,12 +84,7 @@
 
 package com.microfocus.jenkins.plugins.da;
 
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCredentials;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.microfocus.jenkins.plugins.da.client.DAClient;
 import com.microfocus.jenkins.plugins.da.exceptions.VersionNotExistsException;
 import com.microfocus.jenkins.plugins.da.model.DAStep;
@@ -100,28 +95,17 @@ import com.urbancode.vfs.common.ClientChangeSet;
 import com.urbancode.vfs.common.ClientPathEntry;
 import hudson.*;
 import hudson.console.HyperlinkNote;
-import hudson.model.AbstractProject;
-import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
 import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Step to add files to a component version in Micro Focus Deployment Automation
@@ -130,65 +114,65 @@ import java.util.regex.Pattern;
  */
 public class AddFilesToVersionStep extends DAStep {
 
-    private String componentName;
-    private String versionName;
-    private String baseDir;
-    private String dirOffset;
-    private String includeFiles;
-    private String excludeFiles;
+    private String component;
+    private String version;
+    private String base;
+    private String offset;
+    private String includes;
+    private String excludes;
 
     @DataBoundSetter
-    public void setComponentName(final String componentName) {
-        this.componentName = componentName;
+    public void setComponent(final String component) {
+        this.component = component;
     }
 
-    public String getComponentName() {
-        return this.componentName;
-    }
-
-    @DataBoundSetter
-    public void setVersionName(final String versionName) {
-        this.versionName = versionName;
-    }
-
-    public String getVersionName() {
-        return this.versionName;
+    public String getComponent() {
+        return this.component;
     }
 
     @DataBoundSetter
-    public void setBaseDir(final String baseDir) {
-        this.baseDir = baseDir;
+    public void setVersion(final String version) {
+        this.version = version;
     }
 
-    public String getBaseDir() {
-        return this.baseDir;
-    }
-
-    @DataBoundSetter
-    public void setDirOffset(final String dirOffset) {
-        this.dirOffset = dirOffset;
-    }
-
-    public String getDirOffset() {
-        return this.dirOffset;
+    public String getVersion() {
+        return this.version;
     }
 
     @DataBoundSetter
-    public void setIncludeFiles(final String includeFiles) {
-        this.includeFiles = includeFiles;
+    public void setBase(final String base) {
+        this.base = base;
     }
 
-    public String getIncludeFiles() {
-        return this.includeFiles;
+    public String getBase() {
+        return this.base;
     }
 
     @DataBoundSetter
-    public void setExcludeFiles(final String excludeFiles) {
-        this.excludeFiles = excludeFiles;
+    public void setOffset(final String offset) {
+        this.offset = offset;
     }
 
-    public String getExcludeFiles() {
-        return this.excludeFiles;
+    public String getOffset() {
+        return this.offset;
+    }
+
+    @DataBoundSetter
+    public void setIncludes(final String includes) {
+        this.includes = includes;
+    }
+
+    public String getIncludes() {
+        return this.includes;
+    }
+
+    @DataBoundSetter
+    public void setExcludes(final String excludes) {
+        this.excludes = excludes;
+    }
+
+    public String getExcludes() {
+        return this.excludes;
     }
 
     @DataBoundConstructor
@@ -208,31 +192,31 @@ public class AddFilesToVersionStep extends DAStep {
     @Extension
     public static class DescriptorImpl extends DADescriptorImpl {
 
-        private FormValidation verifyComponentName(final String componentName) {
-            if (StringUtils.isEmpty(componentName))
-                return FormValidation.error("A component name is required");
+        private FormValidation verifyComponent(final String component) {
+            if (StringUtils.isEmpty(component))
+                return FormValidation.error("A component is required");
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckComponentName(@QueryParameter final String value) {
-            return verifyComponentName(value);
+        public FormValidation doCheckComponent(@QueryParameter final String value) {
+            return verifyComponent(value);
         }
 
-        private FormValidation verifyVersionName(final String versionName) {
-            if (StringUtils.isEmpty(versionName))
-                return FormValidation.error("A version name is required");
+        private FormValidation verifyVersion(final String version) {
+            if (StringUtils.isEmpty(version))
+                return FormValidation.error("A version is required");
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckVersionName(@QueryParameter final String value) {
-            return verifyVersionName(value);
+        public FormValidation doCheckVersion(@QueryParameter final String value) {
+            return verifyVersion(value);
         }
 
         public String getDefaultWorkspace() {
             return "${WORKSPACE}";
         }
 
-        public String getDefaultVersionName() {
+        public String getDefaultVersion() {
             return "${BUILD_NUMBER}";
         }
 
@@ -257,18 +241,18 @@ public class AddFilesToVersionStep extends DAStep {
 
         this.setLogger(listener.getLogger());
 
-        // if baseDir is empty, set it to workspace
-        String validBaseDir = getBaseDir();
-        if (StringUtils.isEmpty(getBaseDir())) {
+        // if base is empty, set it to workspace
+        String validBaseDir = getBase();
+        if (StringUtils.isEmpty(getBase())) {
             validBaseDir = "${BUILD_WORKSPACE}";
         }
 
-        String resolvedComponentName = run.getEnvironment(listener).expand(getComponentName());
-        String resolvedVersionName = run.getEnvironment(listener).expand(getVersionName());
+        String resolvedComponentName = run.getEnvironment(listener).expand(getComponent());
+        String resolvedVersionName = run.getEnvironment(listener).expand(getVersion());
         String resolvedBaseDir = run.getEnvironment(listener).expand(validBaseDir);
-        String resolvedDirOffset = run.getEnvironment(listener).expand(getDirOffset());
-        String resolvedIncludeFiles = run.getEnvironment(listener).expand(getIncludeFiles());
-        String resolvedExcludeFiles = run.getEnvironment(listener).expand(getExcludeFiles());
+        String resolvedDirOffset = run.getEnvironment(listener).expand(getOffset());
+        String resolvedIncludeFiles = run.getEnvironment(listener).expand(getIncludes());
+        String resolvedExcludeFiles = run.getEnvironment(listener).expand(getExcludes());
 
         final UsernamePasswordCredentials usernamePasswordCredentials = DAUtils.getUsernamePasswordCredentials(getCredentialsId());
         if (usernamePasswordCredentials == null) {
@@ -322,7 +306,7 @@ public class AddFilesToVersionStep extends DAStep {
         if (!workDir.exists())
             throw new AbortException("Base artifact directory \"" + workDir.toString()
                 + "\" does not exist!");
-        if (dirOffset != null && resolvedDirOffset.trim().length() > 0) {
+        if (offset != null && resolvedDirOffset.trim().length() > 0) {
             workDir = new File(workDir, resolvedDirOffset.trim());
         }
 
@@ -333,7 +317,7 @@ public class AddFilesToVersionStep extends DAStep {
                 includesSet.add(pattern.trim());
             }
         }
-        if (excludeFiles != null) {
+        if (excludes != null) {
             for (String pattern : resolvedExcludeFiles.split("\n")) {
                 if (pattern != null && pattern.trim().length() > 0) {
                     excludesSet.add(pattern.trim());

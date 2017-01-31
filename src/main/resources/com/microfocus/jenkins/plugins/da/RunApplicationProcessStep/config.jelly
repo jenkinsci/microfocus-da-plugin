@@ -1,0 +1,31 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+
+    <j:set var="helpURL" value="/plugin/microfocus-da"/>
+
+    <f:entry field="url" title="${%Micro Focus DA URL}" help="${helpURL}/help-url.html">
+        <f:textbox/>
+    </f:entry>
+    <f:entry field="credentialsId" title="${%Micro Focus DA Credentials}" help="${helpURL}/help-credentialsId.html">
+        <c:select/>
+    </f:entry>
+    <f:entry field="application" title="${%Application}" help="${helpURL}/help-application.html">
+        <f:textbox/>
+    </f:entry>
+    <f:entry field="environment" title="${%Environment}" help="${helpURL}/help-applicationEnvironment.html">
+        <f:textbox/>
+    </f:entry>
+    <f:entry field="process" title="${%Process}" help="${helpURL}/help-applicationProcess.html">
+        <f:textbox />
+    </f:entry>
+    <f:entry field="versions" title="${%Versions}" help="${helpURL}/help-deployVersions.html">
+        <f:textarea/>
+    </f:entry>
+    <f:entry field="properties" title="${%Properties}" help="${helpURL}/help-deployProperties.html">
+        <f:textarea/>
+    </f:entry>
+    <f:entry file="onlyChangedVersions" title="${%Only Changed Versions}" help="${helpURL}/help-onlyChangedVersions.html">
+        <f:checkbox default="true"/>
+    </f:entry>
+
+</j:jelly>

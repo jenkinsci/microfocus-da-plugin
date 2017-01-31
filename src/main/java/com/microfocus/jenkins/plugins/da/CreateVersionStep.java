@@ -86,7 +86,6 @@ package com.microfocus.jenkins.plugins.da;
 
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.microfocus.jenkins.plugins.da.client.DAClient;
-import com.microfocus.jenkins.plugins.da.exceptions.VersionAlreadyExistsException;
 import com.microfocus.jenkins.plugins.da.exceptions.VersionNotExistsException;
 import com.microfocus.jenkins.plugins.da.model.DAStep;
 import com.microfocus.jenkins.plugins.da.utils.DAUtils;
@@ -118,36 +117,36 @@ import java.net.URI;
  */
 public class CreateVersionStep extends DAStep {
 
-    private String componentName;
-    private String versionName;
-    private String versionProperties;
+    private String component;
+    private String version;
+    private String properties;
     private boolean failIfVersionExists;
 
     @DataBoundSetter
-    public void setComponentName(final String componentName) {
-        this.componentName = componentName;
+    public void setComponent(final String component) {
+        this.component = component;
     }
 
-    public String getComponentName() {
-        return this.componentName;
-    }
-
-    @DataBoundSetter
-    public void setVersionName(final String versionName) {
-        this.versionName = versionName;
-    }
-
-    public String getVersionName() {
-        return this.versionName;
+    public String getComponent() {
+        return this.component;
     }
 
     @DataBoundSetter
-    public void setVersionProperties(final String versionProperties) {
-        this.versionProperties = versionProperties;
+    public void setVersion(final String version) {
+        this.version = version;
     }
 
-    public String getVersionProperties() {
-        return this.versionProperties;
+    public String getVersion() {
+        return this.version;
+    }
+
+    @DataBoundSetter
+    public void setProperties(final String properties) {
+        this.properties = properties;
+    }
+
+    public String getProperties() {
+        return this.properties;
     }
 
     @DataBoundSetter
@@ -178,27 +177,27 @@ public class CreateVersionStep extends DAStep {
     @Extension
     public static class DescriptorImpl extends DADescriptorImpl {
 
-        private FormValidation verifyComponentName(final String componentName) {
-            if (StringUtils.isEmpty(componentName))
-                return FormValidation.error("A component name is required");
+        private FormValidation verifyComponent(final String component) {
+            if (StringUtils.isEmpty(component))
+                return FormValidation.error("A component is required");
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckComponentName(@QueryParameter final String value) {
-            return verifyComponentName(value);
+        public FormValidation doCheckComponent(@QueryParameter final String value) {
+            return verifyComponent(value);
         }
 
-        private FormValidation verifyVersionName(final String versionName) {
-            if (StringUtils.isEmpty(versionName))
-                return FormValidation.error("A version name is required");
+        private FormValidation verifyVersion(final String version) {
+            if (StringUtils.isEmpty(version))
+                return FormValidation.error("A version is required");
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckVersionName(@QueryParameter final String value) {
-            return verifyVersionName(value);
+        public FormValidation doCheckVersion(@QueryParameter final String value) {
+            return verifyVersion(value);
         }
 
-        public String getDefaultVersionName() {
+        public String getDefaultVersion() {
             return "${BUILD_NUMBER}";
         }
 
@@ -214,9 +213,9 @@ public class CreateVersionStep extends DAStep {
 
         this.setLogger(listener.getLogger());
 
-        String resolvedComponentName = run.getEnvironment(listener).expand(getComponentName());
-        String resolvedVersionName = run.getEnvironment(listener).expand(getVersionName());
-        String resolvedVersionProperties = run.getEnvironment(listener).expand(getVersionProperties());
+        String resolvedComponentName = run.getEnvironment(listener).expand(getComponent());
+        String resolvedVersionName = run.getEnvironment(listener).expand(getVersion());
+        String resolvedVersionProperties = run.getEnvironment(listener).expand(getProperties());
 
         final UsernamePasswordCredentials usernamePasswordCredentials = DAUtils.getUsernamePasswordCredentials(getCredentialsId());
         if (usernamePasswordCredentials == null) {

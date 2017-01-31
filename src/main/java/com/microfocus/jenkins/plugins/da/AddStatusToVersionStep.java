@@ -89,31 +89,22 @@ import com.microfocus.jenkins.plugins.da.client.DAClient;
 import com.microfocus.jenkins.plugins.da.exceptions.VersionNotExistsException;
 import com.microfocus.jenkins.plugins.da.model.DAStep;
 import com.microfocus.jenkins.plugins.da.utils.DAUtils;
-import com.urbancode.commons.fileutils.filelister.FileListerBuilder;
-import com.urbancode.vfs.client.Client;
-import com.urbancode.vfs.common.ClientChangeSet;
-import com.urbancode.vfs.common.ClientPathEntry;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.console.HyperlinkNote;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONObject;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.ws.rs.core.UriBuilder;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLDecoder;
-import java.util.*;
 
 /**
  * Step to add a status to a component version in Micro Focus Deployment Automation
@@ -122,35 +113,35 @@ import java.util.*;
  */
 public class AddStatusToVersionStep extends DAStep {
 
-    private String componentName;
-    private String versionName;
-    private String statusName;
+    private String component;
+    private String version;
+    private String status;
 
     @DataBoundSetter
-    public void setComponentName(final String componentName) {
-        this.componentName = componentName;
+    public void setComponent(final String component) {
+        this.component = component;
     }
 
-    public String getComponentName() {
-        return this.componentName;
-    }
-
-    @DataBoundSetter
-    public void setVersionName(final String versionName) {
-        this.versionName = versionName;
-    }
-
-    public String getVersionName() {
-        return this.versionName;
+    public String getComponent() {
+        return this.component;
     }
 
     @DataBoundSetter
-    public void setStatusName(final String statusName) {
-        this.statusName = statusName;
+    public void setVersion(final String version) {
+        this.version = version;
     }
 
-    public String getStatusName() {
-        return this.statusName;
+    public String getVersion() {
+        return this.version;
+    }
+
+    @DataBoundSetter
+    public void setStatus(final String status) {
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return this.status;
     }
 
     @DataBoundConstructor
@@ -170,34 +161,38 @@ public class AddStatusToVersionStep extends DAStep {
     @Extension
     public static class DescriptorImpl extends DADescriptorImpl {
 
-        private FormValidation verifyComponentName(final String componentName) {
-            if (StringUtils.isEmpty(componentName))
-                return FormValidation.error("A component name is required");
+        private FormValidation verifyComponent(final String component) {
+            if (StringUtils.isEmpty(component))
+                return FormValidation.error("A component is required");
             return FormValidation.ok();
         }
 
         public FormValidation doCheckComponentName(@QueryParameter final String value) {
-            return verifyComponentName(value);
+            return verifyComponent(value);
         }
 
-        private FormValidation verifyVersionName(final String versionName) {
-            if (StringUtils.isEmpty(versionName))
-                return FormValidation.error("A version name is required");
+        private FormValidation verifyVersionName(final String version) {
+            if (StringUtils.isEmpty(version))
+                return FormValidation.error("A version is required");
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckVersionName(@QueryParameter final String value) {
+        public FormValidation doCheckVersion(@QueryParameter final String value) {
             return verifyVersionName(value);
         }
 
-        private FormValidation verifyStatusName(final String statusName) {
-            if (StringUtils.isEmpty(statusName))
-                return FormValidation.error("A status name is required");
+        private FormValidation verifyStatus(final String status) {
+            if (StringUtils.isEmpty(status))
+                return FormValidation.error("A status is required");
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckStatusName(@QueryParameter final String value) {
-            return verifyStatusName(value);
+        public FormValidation doCheckStatus(@QueryParameter final String value) {
+            return verifyStatus(value);
+        }
+
+        public String getDefaultVersion() {
+            return "${BUILD_NUMBER}";
         }
 
         @Override
@@ -212,9 +207,9 @@ public class AddStatusToVersionStep extends DAStep {
 
         this.setLogger(listener.getLogger());
 
-        String resolvedComponentName = run.getEnvironment(listener).expand(getComponentName());
-        String resolvedVersionName = run.getEnvironment(listener).expand(getVersionName());
-        String resolvedStatusName = run.getEnvironment(listener).expand(getStatusName());
+        String resolvedComponentName = run.getEnvironment(listener).expand(getComponent());
+        String resolvedVersionName = run.getEnvironment(listener).expand(getVersion());
+        String resolvedStatusName = run.getEnvironment(listener).expand(getStatus());
 
         final UsernamePasswordCredentials usernamePasswordCredentials = DAUtils.getUsernamePasswordCredentials(getCredentialsId());
         if (usernamePasswordCredentials == null) {
@@ -267,7 +262,7 @@ public class AddStatusToVersionStep extends DAStep {
             UriBuilder uriBuilder = UriBuilder.fromPath(getUrl()).path("rest").path("deploy").path("version")
                     .path(versionId).path("status").path(resolvedStatusName);
             URI uri = uriBuilder.build();
-            String json = "{\"status\":\"" + statusName + "\"}";
+            String json = "{\"status\":\"" + status + "\"}";
             log("Adding status \"" + resolvedStatusName + "\" to component version id: \"" + versionId + "\"");
             daClient.executeJSONPut(uri, json);
             log("Successfully added status \"" + resolvedStatusName + "\"");

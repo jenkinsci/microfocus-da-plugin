@@ -114,6 +114,8 @@ public class DAClient implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public static enum PROCESS_TYPE { applicationProcess, componentProcess, genericProcess }
+
     /**
      * The url.
      */
@@ -325,6 +327,60 @@ public class DAClient implements Serializable {
             result = propertyJson.getString("id").trim();
         }
         return result;
+    }
+
+    public String checkProcessStatus(PROCESS_TYPE processType, String requestId) throws Exception {
+        String typePath = "process";
+        String processPath = "request";
+        if (processType == PROCESS_TYPE.applicationProcess) {
+            typePath = "deploy";
+            processPath = "applicationProcessRequest";
+        } else if (processType == PROCESS_TYPE.componentProcess) {
+            typePath = "deploy";
+            processPath = "componentProcessRequest";
+        }
+        String deploymentResult = "SCHEDULED";
+
+        URI uri = UriBuilder.fromPath(getUrl()).path("rest").path(typePath).path(processPath).path(requestId).build();
+        String requestResult = executeJSONGet(uri);
+        if (requestResult != null && requestResult.contains("rootTrace"))
+        {
+            JSONObject rootTrace = new JSONObject(requestResult).optJSONObject("rootTrace");
+            if (rootTrace != null) {
+                String executionStatus = (String) rootTrace.get("state");
+                String executionResult = (String) rootTrace.get("result");
+                if ((executionStatus == null) || ("".equals(executionStatus))) {
+                    deploymentResult = "FAULTED";
+                } else if ("executing".equalsIgnoreCase(executionStatus)) {
+                    deploymentResult = "EXECUTING";
+                } else if (("closed".equalsIgnoreCase(executionStatus)) || ("faulted".equalsIgnoreCase(executionStatus)) || ("faulted".equalsIgnoreCase(executionResult))) {
+                    deploymentResult = executionResult;
+                }
+            }
+        }
+        return deploymentResult;
+    }
+
+    public String checkGenericProcessStatus(String requestId) throws Exception
+    {
+        String deploymentResult = "SCHEDULED";
+
+        URI uri = UriBuilder.fromPath(getUrl()).path("rest").path("process").path("request").path(requestId).build();
+        String requestResult = executeJSONGet(uri);
+        if (requestResult != null)
+        {
+            JSONObject trace = new JSONObject(requestResult).optJSONObject("trace");
+            if (trace != null) {
+                String executionStatus = (String) trace.get("state");
+                String executionResult = (String) trace.get("result");
+                if ((executionStatus == null) || ("".equals(executionStatus))) {
+                    deploymentResult = "FAULTED";
+                } else if (("closed".equalsIgnoreCase(executionStatus)) || ("faulted".equalsIgnoreCase(executionStatus)) || ("faulted".equalsIgnoreCase(executionResult))) {
+                    deploymentResult = executionResult;
+                }
+            }
+        }
+        return deploymentResult;
     }
 
     //

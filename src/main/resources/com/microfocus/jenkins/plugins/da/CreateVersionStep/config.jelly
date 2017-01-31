@@ -9,16 +9,16 @@
     <f:entry field="credentialsId" title="${%Micro Focus DA Credentials}" help="${helpURL}/help-credentialsId.html">
         <c:select/>
     </f:entry>
-    <f:entry field="componentName" title="${%Component Name}" help="${helpURL}/help-componentName.html">
+    <f:entry field="component" title="${%Component}" help="${helpURL}/help-component.html">
         <f:textbox/>
     </f:entry>
-    <f:entry field="versionName" title="${%Version Name}" help="${helpURL}/help-versionName.html">
-        <f:textbox default="${descriptor.getDefaultVersionName()}"/>
+    <f:entry field="version" title="${%Version}" help="${helpURL}/help-version.html">
+        <f:textbox default="${descriptor.getDefaultVersion()}"/>
     </f:entry>
-    <f:entry field="versionProperties" title="${%Version Properties}" help="${helpURL}/help-versionProperties.html">
+    <f:entry field="properties" title="${%Properties}" help="${helpURL}/help-versionProperties.html">
         <f:textarea/>
     </f:entry>
-    <f:entry file="failIfVersionExists" title="${%Fail if Version already Exists}" help="${helpURL}/help-failIfVersionExists.html">
+    <f:entry file="failIfVersionExists" title="${%Fail if version already Exists}" help="${helpURL}/help-failIfVersionExists.html">
         <f:checkbox/>
     </f:entry>
 

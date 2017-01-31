@@ -9,13 +9,13 @@
     <f:entry field="credentialsId" title="${%Micro Focus DA Credentials}" help="${helpURL}/help-credentialsId.html">
         <c:select/>
     </f:entry>
-    <f:entry field="componentName" title="${%Component Name}" help="${helpURL}/help-componentName.html">
+    <f:entry field="component" title="${%Component}" help="${helpURL}/help-component.html">
         <f:textbox/>
     </f:entry>
-    <f:entry field="versionName" title="${%Version Name}" help="${helpURL}/help-versionName.html">
-        <f:textbox default="${descriptor.getDefaultVersionName()}"/>
+    <f:entry field="version" title="${%Version}" help="${helpURL}/help-version.html">
+        <f:textbox default="${descriptor.getDefaultVersion()}"/>
     </f:entry>
-    <f:entry field="statusName" title="${%Status Name}" help="${helpURL}/help-statusName.html">
+    <f:entry field="status" title="${%Status}" help="${helpURL}/help-status.html">
         <f:textbox default="BUILT"/>
     </f:entry>
 </j:jelly>

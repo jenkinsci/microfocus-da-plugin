@@ -9,22 +9,22 @@
     <f:entry field="credentialsId" title="${%Micro Focus DA Credentials}" help="${helpURL}/help-credentialsId.html">
         <c:select/>
     </f:entry>
-    <f:entry field="componentName" title="${%Component Name}" help="${helpURL}/help-componentName.html">
+    <f:entry field="component" title="${%Component}" help="${helpURL}/help-component.html">
         <f:textbox/>
     </f:entry>
-    <f:entry field="versionName" title="${%Version Name}" help="${helpURL}/help-versionName.html">
-        <f:textbox default="${descriptor.getDefaultVersionName()}"/>
+    <f:entry field="version" title="${%Version}" help="${helpURL}/help-version.html">
+        <f:textbox default="${descriptor.getDefaultVersion()}"/>
     </f:entry>
-    <f:entry field="baseDir" title="${%Base Directory}" help="${helpURL}/help-baseDir.html">
+    <f:entry field="base" title="${%Base Directory}" help="${helpURL}/help-base.html">
         <f:textbox default="${descriptor.getDefaultWorkspace()}"/>
     </f:entry>
-    <f:entry field="dirOffset" title="${%Directory Offset}" help="${helpURL}/help-dirOffset.html">
+    <f:entry field="offset" title="${%Directory Offset}" help="${helpURL}/help-offset.html">
         <f:textbox/>
     </f:entry>
-    <f:entry field="includeFiles" title="${%Files to Include}" help="${helpURL}/help-includesFiles.html">
+    <f:entry field="includes" title="${%Files to Include}" help="${helpURL}/help-includes.html">
         <f:textarea default="**/*"/>
     </f:entry>
-    <f:entry field="excludeFiles" title="${%Files to Exclude}" help="${helpURL}/help-excludesFiles.html">
+    <f:entry field="excludes" title="${%Files to Exclude}" help="${helpURL}/help-excludes.html">
         <f:textarea/>
     </f:entry>
 </j:jelly>
