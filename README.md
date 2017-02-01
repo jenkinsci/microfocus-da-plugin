@@ -71,7 +71,7 @@ jenkins-test=version-${BUILD_NUMBER}
 
 1) Clone the repository from github.
 
-2> Build the plugin:
+2) Build the plugin:
 
 ```
 mvn clean package
