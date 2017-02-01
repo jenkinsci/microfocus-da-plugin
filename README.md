@@ -68,7 +68,6 @@ jenkins-test=version-${BUILD_NUMBER}
 ```
 
 ## Build Instructions
-------------------
 
 1) Clone the repository from github.
 
