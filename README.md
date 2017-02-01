@@ -1,6 +1,6 @@
 # Micro Focus Deployment Automation plugin for Jenkins 2.0
 
-This plugin allows Micro Focus Deployment Automation to be used in Jenkins Pipelines.
+This plugin allows Micro Focus Deployment Automation to be used in [Jenkins Pipelines](https://jenkins.io/solutions/pipeline/).
 It currently provides the following adhoc build steps:
 
 - Create Version
@@ -8,9 +8,11 @@ It currently provides the following adhoc build steps:
 - Add Status to Version
 - Run Application Process
 
-The steps can be used in "freestyle" projects but are designed to be used in Pipelines. Some example pipeline code is illustrated below:
+The steps can be used in "freestyle" projects but are designed to be used in pipelines. 
 
-'''
+## Example pipeline code
+
+```
 node {
     def verProperties = 
 """
@@ -63,7 +65,7 @@ jenkins-test=version-${BUILD_NUMBER}
             onlyChangedVersions: false    
    }
 }
-'''
+```
 
 ## Build Instructions
 ------------------
