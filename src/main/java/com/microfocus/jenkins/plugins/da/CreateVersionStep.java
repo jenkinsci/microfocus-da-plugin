@@ -302,8 +302,8 @@ public class CreateVersionStep extends DAStep {
                 while ((line = bufReader.readLine()) != null) {
                     if (line.trim().length() > 0) { // ignore empty lines
                         String[] parts = line.trim().split("=");
-                        log("\t" + parts[0] + " = " + parts[1]);
-                        jsonVersionProperties += ("\"" + parts[0] + "\": \"" + parts[1] + "\",");
+                        log(String.format("\t%s = %s", parts[0], parts[1]));
+                        jsonVersionProperties = jsonVersionProperties.concat(String.format("\"%s\": \"%s\",", parts[0], parts[1]));
                     }
                 }
                 // remove last comma if it exists

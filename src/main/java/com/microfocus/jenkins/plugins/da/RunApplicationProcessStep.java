@@ -301,8 +301,9 @@ public class RunApplicationProcessStep extends DAStep {
         while ((line = bufReader.readLine()) != null) {
             if (line.trim().length() > 0) { // ignore empty lines
                 String[] parts = line.trim().split("=");
-                log("\t" + parts[0] + " = " + parts[1]);
-                versionsProperties += ("{\"component\":\"" + parts[0] + "\", \"version\":\"" + parts[1] + "\"},");
+                log(String.format("\t%s = %s", parts[0], parts[1]));
+                versionsProperties = versionsProperties.concat(String.format("{\"component\":\"%s\", \"version\":\"%s\"},",
+                        parts[0], parts[1]));
             }
         }
         // remove last comma if it exists
@@ -323,8 +324,8 @@ public class RunApplicationProcessStep extends DAStep {
             while ((line = bufReader.readLine()) != null) {
                 if (line.trim().length() > 0) { // ignore empty lines
                     String[] parts = line.trim().split("=");
-                    log("\t" + parts[0] + " = " + parts[1]);
-                    deployProperties += ("\"" + parts[0] + "\": \"" + parts[1] + "\",");
+                    log(String.format("\t%s = %s", parts[0], parts[1]));
+                    deployProperties = deployProperties.concat(String.format("\"%s\": \"%s\",", parts[0], parts[1]));
                 }
             }
             // remove last comma if it exists

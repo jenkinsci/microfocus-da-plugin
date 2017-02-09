@@ -242,7 +242,6 @@ public class AddStatusToVersionStep extends DAStep {
             // get componentId
             String compId[] = daClient.getComponentIdAndRepositoryId(resolvedComponentName);
             componentId = compId[0];
-            componentRepositoryId = compId[1];
             //log("Found component id: " + componentId);
         } catch (Exception ex) {
             throw new AbortException("Unable to retrieve component id: " + ex.toString());
