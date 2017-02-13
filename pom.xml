@@ -17,7 +17,7 @@
     <name>Micro Focus Deployment Automation</name>
     <description>Micro Focus Deployment Automation Build Steps</description>
     <url>
-        http://www.serena.com/index.php/en/products/deployment-configuration-automation/serena-deployment-automation/overview
+        https://wiki.jenkins-ci.org/display/JENKINS/Micro+Focus+Deployment+Automation+Plugin
     </url>
     <licenses>
         <license>
