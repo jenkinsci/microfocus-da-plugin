@@ -134,7 +134,7 @@ remove.container=true
     }
 }
 ```
-![Example Pipeline](https://github.com/jenkinsci/microfocus-da-plugin/images/jenkins-pipeline.png)
+![Example Pipeline](https://github.com/jenkinsci/microfocus-da-plugin/blob/master/images/jenkins-pipeline.png)
 
 ## Build/Usage Instructions
 
