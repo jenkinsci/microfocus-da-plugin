@@ -41,7 +41,7 @@
         <workflow-job.version>2.9</workflow-job.version>
         <credentials.version>2.1.10</credentials.version>
         <plain-credentials.version>1.3</plain-credentials.version>
-        <httpclient.version>4.5.1</httpclient.version>
+        <httpclient.version>4.5.13</httpclient.version>
         <junit.version>4.11</junit.version>
         <sda-version>6.1.3</sda-version>
     </properties>
